@@ -1,0 +1,59 @@
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["relationJoins"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Profile {
+  id          String       @id @default(cuid())
+  slug        String       @unique @default("main")
+  name        String
+  description String       @db.Text
+  githubUrl   String?
+  linkedinUrl String?
+  websiteUrl  String?
+  skills      Skill[]
+  experience  Experience[]
+  projects    Project[]
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+}
+
+model Skill {
+  id        String  @id @default(cuid())
+  name      String
+  position  Int     @default(0)
+  profileId String
+  profile   Profile @relation(fields: [profileId], references: [id], onDelete: Cascade)
+
+  @@index([profileId, position])
+}
+
+model Experience {
+  id           String   @id @default(cuid())
+  company      String
+  position     String
+  period       String
+  achievements String[]
+  positionIndex Int      @default(0)
+  profileId     String
+  profile       Profile  @relation(fields: [profileId], references: [id], onDelete: Cascade)
+
+  @@index([profileId, positionIndex])
+}
+
+model Project {
+  id          String  @id @default(cuid())
+  name        String
+  description String  @db.Text
+  url         String?
+  position    Int     @default(0)
+  profileId   String
+  profile     Profile @relation(fields: [profileId], references: [id], onDelete: Cascade)
+
+  @@index([profileId, position])
+}
